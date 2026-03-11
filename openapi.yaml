@@ -60,12 +60,12 @@ components:
         andringsorsak:
           type: string
           description: Orsak till ändring av yrkandet
-        yrkanderoll:
+        yrkandeindivider:
           type: array
-          description: Rollerna i yrkandet
+          description: Individer och dess roller i yrkandet
           items:
-            $ref: '#/components/schemas/Yrkanderoll'
-        ersattning:
+            $ref: '#/components/schemas/Yrkandeindivid'
+        ersattningar:
           type: array
           description: En eller flera ersättningar kopplade till yrkandet
           items:
@@ -108,9 +108,9 @@ components:
         - BORTTAG
         - ATERTAGEN
 
-    Yrkanderoll:
+    Yrkandeindivid:
       type: object
-      description: Roll i yrkandet
+      description: Individ och dess roll i yrkandet
       properties:
         id:
           type: string
@@ -118,15 +118,15 @@ components:
           format: uuid
         individ:
           $ref: '#/components/schemas/Individ'
-        roll:
-          $ref: '#/components/schemas/Roll'
+        yrkanderoll:
+          $ref: '#/components/schemas/Yrkanderoll'
         yrkande:
           type: boolean
           description: Yrkande
       required:
         - id
         - individ
-        - roll
+        - yrkanderoll
         - yrkande
 
     Individ:
@@ -148,7 +148,7 @@ components:
         - fornamn
         - efternamn
 
-    Roll:
+    Yrkanderoll:
       type: object
       description: Roll i yrkandet
       properties:
@@ -281,7 +281,7 @@ components:
               persnr:
                 type: string
                 description: Svenskt personnummer, 12 siffror med bindestreck (YYYYMMDD-XXXX)
-              roll:
+              yrkanderollId:
                 type: string
                 format: uuid
                 description: Id för roll i yrkandet
