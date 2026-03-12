@@ -54,6 +54,36 @@ paths:
                 $ref: '#/components/schemas/Yrkande'
         '404':
           description: Yrkande hittades inte
+          
+  /yrkande/{yrkandeId}/ersattning:
+    patch:
+      tags: [ YrkandeController ]
+      operationId: patchErsattningar
+      summary: Uppdatera ersättningar i ett yrkande
+      description: Uppdatera ersättningar i ett yrkande
+      parameters:
+        - name: yrkandeId
+          in: path
+          required: true
+          description: Yrkandets id
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchErsattningarRequest'
+      responses:
+        '200':
+          description: Ersättningar uppdaterade OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatchErsattningarResponse'
+        '400':
+          description: Bad request (t.ex. felaktigt yrkandeId)
 
 components:
   schemas:
@@ -96,6 +126,13 @@ components:
             $ref: '#/components/schemas/Ersattning'
       required:
         - id
+        - formanstyp
+        - version
+        - yrkandedatum
+        - yrkandestatus
+        - period
+        - avsikt
+        - yrkandeindivider
 
     Yrkandestatus:
       type: string
@@ -138,7 +175,7 @@ components:
       properties:
         id:
           type: string
-          description:  unika ID
+          description: Yrkandeindivid-kopplingens unika ID
           format: uuid
         individ:
           $ref: '#/components/schemas/Individ'
@@ -356,3 +393,39 @@ components:
         - JA
         - NEJ
         - FU
+
+    UpdateErsattning:
+      type: object
+      description: Uppdatering av beslutsutfall för en ersättning
+      properties:
+        ersattningId:
+          type: string
+          format: uuid
+          description: Ersättningens unika ID
+        beslutsutfall:
+          $ref: '#/components/schemas/Beslutsutfall'
+          nullable: true
+        avslagsanledning:
+          type: string
+          nullable: true
+          description: Anledning till avslag
+        ErsattningsStatus:
+          $ref: '#/components/schemas/Ersattningsstatus'
+          nullable: true
+      required:
+        - ersattningId
+
+    PatchErsattningarRequest:
+      type: array
+      description: Lista med ersättningar att uppdatera beslutsutfall för
+      items:
+        $ref: '#/components/schemas/UpdateErsattning'
+
+    PatchErsattningarResponse:
+      type: object
+      description: Returneras nya yrkandet efter uppdatering av beslutsutfall i ersättningar
+      properties:
+        yrkande:
+          $ref: '#/components/schemas/Yrkande'
+      required:
+        - yrkande
