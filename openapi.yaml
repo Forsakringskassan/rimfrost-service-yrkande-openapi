@@ -31,6 +31,30 @@ paths:
               schema:
                 $ref: '#/components/schemas/PostYrkandeResponse'
 
+  /yrkande/{yrkandeId}:
+    get:
+      tags: [ YrkandeController ]
+      operationId: getYrkande
+      summary: Hämtar ett yrkande
+      description: Hämtar ett yrkande baserat på dess unika ID
+      parameters:
+        - name: yrkandeId
+          in: path
+          required: true
+          description: Yrkandets unika ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Yrkande hittat
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Yrkande'
+        '404':
+          description: Yrkande hittades inte
+
 components:
   schemas:
     Yrkande:
