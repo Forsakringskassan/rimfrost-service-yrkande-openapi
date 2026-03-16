@@ -331,15 +331,23 @@ components:
           type: string
           description: DateTime när handläggning avslutades, enligt ISO 8601
           format: date-time
-        handlaggningspecifikation:
-          $ref: '#/components/schemas/Handlaggningspecifikation'
-        uppgift:
-          $ref: '#/components/schemas/Uppgift'
+        handlaggningspecifikationId:
+          type: string
+          format: uuid
+        resultat:
+          type: array
+          description: Ett eller flera resultat av handläggningen
+          items:
+            $ref: '#/components/schemas/Resultat'
+
       required:
         - id
         - version
         - yrkandeId
         - processinstansId
+        - skapadTS
+        - handlaggningspecifikation
+        - resultat
 
     HandlaggningUpdate:
       type: object
@@ -368,8 +376,19 @@ components:
           type: string
           description: DateTime när handläggning avslutades, enligt ISO 8601
           format: date-time
-        handlaggningspecifikation:
-          $ref: '#/components/schemas/Handlaggningspecifikation'
+        handlaggningspecifikationId:
+          type: string
+          format: uuid
+        underlag:
+          type: array
+          description: Ett eller flera underlag som handläggningen använder sig av
+          items:
+            $ref: '#/components/schemas/Underlag'
+        resultat:
+          type: array
+          description: Ett eller flera resultat av handläggningen
+          items:
+            $ref: '#/components/schemas/Resultat'
         uppgift:
           $ref: '#/components/schemas/UppgiftUpdate'
       required:
@@ -377,6 +396,10 @@ components:
         - version
         - yrkandeId
         - processinstansId
+        - skapadTS
+        - handlaggningspecifikation
+        - underlag
+        - resultat
 
     UppgiftStatus:
       type: string
@@ -385,32 +408,6 @@ components:
         - PLANERAD
         - TILLDELAD
         - AVSLUTAD
-
-    Handlaggningspecifikation:
-      type: object
-      description: Handläggningspecifikation, ärendeslag
-      properties:
-        id:
-          type: string
-          description: Handläggningspecifikationens unika ID
-          format: uuid
-        version:
-          type: string
-          description: Handläggningspecifikationens version
-        bpmn:
-          type: string
-          description: BPMN processbeskrivning
-        namn:
-          type: string
-          description: Namnet på handläggningspecifikationen
-        beskrivning:
-          type: string
-          description: Beskrivning av handläggningspecifikationen
-      required:
-        - id
-        - version
-        - namn
-        - beskrivning
 
     Uppgift:
       type: object
@@ -446,20 +443,39 @@ components:
           type: string
           description: Aktivitetens Id
           format: uuid
+        uppgiftspecifikation:
+          $ref: '#/components/schemas/UppgiftSpecifikation'
         uppgiftStatus:
           $ref: '#/components/schemas/UppgiftStatus'
         FSSAinformation:
           $ref: '#/components/schemas/FSSAinformation'
-        resultat:
+        modifieradeResultat:
           type: array
-          description: Ett eller flera resultat av uppgiften
-          items:
-            $ref: '#/components/schemas/Resultat'
+          description: Resultat modifierade av uppgiften
+          $ref: '#/components/schemas/ModifieratResultat'
       required:
         - id
         - version
         - handlaggningId
         - uppgiftStatus
+
+    UppgiftSpecifikation:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        version:
+          type: int
+
+    ModifieratResultat:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        version:
+          type: int
 
     UppgiftUpdate:
       type: object
@@ -495,20 +511,13 @@ components:
           type: string
           description: Aktivitetens Id
           format: uuid
+        uppgiftspecifikation:
+          $ref: '#/components/schemas/UppgiftSpecifikation'
         uppgiftStatus:
           $ref: '#/components/schemas/UppgiftStatus'
         FSSAinformation:
           $ref: '#/components/schemas/FSSAinformation'
-        underlag:
-          type: array
-          description: Ett eller flera underlag som uppgiften använder sig av
-          items:
-            $ref: '#/components/schemas/Underlag'
-        resultat:
-          type: array
-          description: Ett eller flera resultat av uppgiften
-          items:
-            $ref: '#/components/schemas/Resultat'
+
       required:
         - id
         - version
@@ -535,18 +544,39 @@ components:
     Resultat:
       type: object
       properties:
-        typ:
+        id:
           type: string
-          description: Specificerar vilken typ av resultat det är
+          description: Resultatets unika id
+          format: uuid
         version:
           type: string
           description: Specificerar vilken version av resultatet det är
+        from:
+          type: string
+          format: date-time
+          description: Resultat från och med datum
+        tom:
+          type: string
+          format: date-time
+          description: Resultat till och med datum
+        yrkandestatus:
+          $ref: '#/components/schemas/Yrkandestatus'
+        avslagsanledning:
+          type: string
+          description: Orsak till avslag
+        typ:
+          type: string
+          description: Specificerar vilken typ av resultat det är
         data:
           type: string
           description: All data i resultatet i formatet JSON
       required:
-        - typ
+        - id
         - version
+        - from
+        - tom
+        - yrkandestatus
+        - typ
         - data
 
     FSSAinformation:
