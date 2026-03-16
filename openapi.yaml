@@ -112,12 +112,13 @@ paths:
             schema:
               type: object
               properties:
-                yrkandeId:
-                  type: string
-                  format: uuid
-                  description: Yrkandets id
+                resultat:
+                  type: array
+                  description: Handläggningens initiala resultat
+                  items:
+                    $ref: '#/components/schemas/Resultat'
               required:
-                - yrkandeId
+                - resultat
       responses:
         '201':
           description: Handläggning skapat OK
