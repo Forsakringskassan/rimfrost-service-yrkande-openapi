@@ -164,6 +164,13 @@ paths:
       summary: Uppdatera handläggning
       description: Uppdatera handläggning knutet till handlaggningId
       parameters:
+        - name: yrkandeId
+          in: path
+          required: true
+          description: Yrkandets unika ID
+          schema:
+            type: string
+            format: uuid
         - name: handlaggningId
           in: path
           required: true
