@@ -18,11 +18,17 @@ paths:
             schema:
               $ref: '#/components/schemas/PostYrkandeRequest'
             example:
-              persnr: "19900101-1234"
-              formanstyp: "VAH"
-              period:
-                start: "2025-01-01T00:00:00Z"
-                slut: "2025-12-31T23:59:59Z"
+              erbjudandeId: "a3b9c7b8-1234-4567-89ab-123456789abc"  
+              yrkandeFrom: "2025-01-01T00:00:00Z"
+              yrkandeTom: "2025-01-02T00:00:00Z"
+              individYrkandeRoller:
+                - individId: "58435904-c2b6-4b1f-a0ab-62f1839d8ff2"
+                  yrkandeRollId: "58435904-c2b6-4b1f-a0ab-62f1839d8ff2"
+              yrkatResultat:
+                - from: "2025-01-01T00:00:00Z"
+                  tom: "2025-01-02T00:00:00Z"
+                  typ: "ERSATTNING"
+                  data: "{}"
       responses:
         '201':
           description: Skapat yrkande OK
@@ -54,18 +60,16 @@ paths:
                 $ref: '#/components/schemas/Yrkande'
         '404':
           description: Yrkande hittades inte
-          
-  /yrkande/{yrkandeId}/ersattning:
-    patch:
-      tags: [ YrkandeController ]
-      operationId: patchErsattningar
-      summary: Uppdatera ersättningar i ett yrkande
-      description: Uppdatera ersättningar i ett yrkande
+    put: 
+      tags: [YrkandeController]
+      operationId: putYrkande
+      summary: Uppdatera ett yrkande
+      description: Uppdaterar ett befintligt yrkande
       parameters:
         - name: yrkandeId
           in: path
           required: true
-          description: Yrkandets id
+          description: Yrkandets unika ID
           schema:
             type: string
             format: uuid
@@ -74,16 +78,122 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PatchErsattningarRequest'
+              $ref: '#/components/schemas/PutYrkandeRequest'
       responses:
         '200':
-          description: Ersättningar uppdaterade OK
+          description: Yrkande uppdaterat
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PatchErsattningarResponse'
+                $ref: '#/components/schemas/PutYrkandeResponse'
+        '400':
+          description: Bad request
+        '404':
+          description: Yrkande hittades inte
+
+  /yrkande/{yrkandeId}/handlaggning:
+    post:
+      tags: [ YrkandeController ]
+      operationId: postHandlaggning
+      summary: Skapa en ny handläggning
+      description: Skapa en ny handläggning för ett specifikt yrkande
+      parameters:
+        - name: yrkandeId
+          in: path
+          required: true
+          description: Yrkandets unika ID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                resultat:
+                  type: array
+                  description: Handläggningens initiala resultat
+                  items:
+                    $ref: '#/components/schemas/Resultat'
+              required:
+                - resultat
+      responses:
+        '201':
+          description: Handläggning skapat OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HandlaggningResponse'
         '400':
           description: Bad request (t.ex. felaktigt yrkandeId)
+
+  /yrkande/{yrkandeId}/handlaggning/{handlaggningId}:
+    get:
+      tags: [ YrkandeController ]
+      operationId: getHandlaggning
+      summary: Hämta handläggning
+      description: Hämta handläggning knutet till handlaggningId
+      parameters:
+        - name: yrkandeId
+          in: path
+          required: true
+          description: Yrkandets unika ID
+          schema:
+            type: string
+            format: uuid
+        - name: handlaggningId
+          in: path
+          required: true
+          description: Handläggningens id
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Handläggning hämtat OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HandlaggningResponse'
+        '400':
+          description: Bad request (t.ex. felaktigt handlaggningId)
+    put:
+      tags: [ YrkandeController ]
+      operationId: putHandlaggning
+      summary: Uppdatera handläggning
+      description: Uppdatera handläggning knutet till handlaggningId
+      parameters:
+        - name: yrkandeId
+          in: path
+          required: true
+          description: Yrkandets unika ID
+          schema:
+            type: string
+            format: uuid
+        - name: handlaggningId
+          in: path
+          required: true
+          description: Handläggningens id
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutHandlaggningRequest'
+      responses:
+        '200':
+          description: Handläggning uppdaterad OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PutHandlaggningResponse'
+        '400':
+          description: Bad request (t.ex. felaktigt handlaggningId)
 
 components:
   schemas:
@@ -95,11 +205,12 @@ components:
           type: string
           description: Yrkandets unika ID
           format: uuid
-        formanstyp:
+        erbjudandeId:
           type: string
-          description: Typ av förmån
+          description: Erbjudandets unika ID
+          format: uuid
         version:
-          type: string
+          type: integer
           description: Yrkandets version
         yrkandedatum:
           type: string
@@ -107,32 +218,39 @@ components:
           format: date-time
         yrkandestatus:
           $ref: '#/components/schemas/Yrkandestatus'
-        period:
-          $ref: '#/components/schemas/Period'
-        avsikt:
-          $ref: '#/components/schemas/Avsikt'
-        andringsorsak:
+        yrkandeFrom:
           type: string
-          description: Orsak till ändring av yrkandet
-        yrkandeindivider:
+          format: date-time
+          description: Yrkande från och med datum
+        yrkandeTom:
+          type: string
+          format: date-time
+          description: Yrkande till och med datum
+        avsikt:
+          $ref: '#/components/schemas/Avsiktstyp'
+        individYrkandeRoller:
           type: array
-          description: Individer och dess roller i yrkandet
+          description: Lista av personer involverade i yrkandet samt deras roll
           items:
-            $ref: '#/components/schemas/Yrkandeindivid'
-        ersattningar:
+            $ref: '#/components/schemas/IndividYrkandeRoll'
+        yrkatResultat:
           type: array
-          description: En eller flera ersättningar kopplade till yrkandet
+          description: Lista av yrkade resultat
           items:
-            $ref: '#/components/schemas/Ersattning'
+            $ref: '#/components/schemas/YrkatResultat'
+        handlaggning:
+          $ref: '#/components/schemas/HandlaggningUpdate'
       required:
         - id
-        - formanstyp
+        - erbjudandeId
         - version
         - yrkandedatum
         - yrkandestatus
-        - period
+        - yrkandeFrom
+        - yrkandeTom
         - avsikt
-        - yrkandeindivider
+        - individYrkandeRoller
+        - yrkatResultat
 
     Yrkandestatus:
       type: string
@@ -144,170 +262,26 @@ components:
         - FASTSTALLT_UNDER_UTREDNING
         - FASTSTALLT
 
-    Period:
-      type: object
-      description: En tidsperiod med start och slut
-      properties:
-        start:
-          type: string
-          format: date-time
-          description: Startdatum/tid för perioden, enligt ISO 8601
-        slut:
-          type: string
-          format: date-time
-          description: Slutdatum/tid för perioden, enligt ISO 8601
-      required:
-        - start
-        - slut
-
-    Avsikt:
+    Avsiktstyp:
       type: string
-      description: Avsikt
+      description: Avsiktstyp
       enum:
         - NY
         - ANDRING
         - BORTTAG
         - ATERTAGEN
 
-    Yrkandeindivid:
+    YrkatResultat:
       type: object
-      description: Individ och dess roll i yrkandet
-      properties:
-        id:
-          type: string
-          description: Yrkandeindivid-kopplingens unika ID
-          format: uuid
-        individ:
-          $ref: '#/components/schemas/Individ'
-        yrkanderoll:
-          $ref: '#/components/schemas/Yrkanderoll'
-        yrkande:
-          type: boolean
-          description: Yrkande
-      required:
-        - id
-        - individ
-        - yrkanderoll
-        - yrkande
-
-    Individ:
-      type: object
-      description: Individ
-      properties:
-        id:
-          type: string
-          description: Svenskt personnummer, 12 siffror med bindestreck (YYYYMMDD-XXXX)
-          pattern: '^\d{8}-\d{4}$'
-        fornamn:
-          type: string
-          description: Förnamn
-        efternamn:
-          type: string
-          description: Efternamn
-      required:
-        - id
-        - fornamn
-        - efternamn
-
-    Yrkanderoll:
-      type: object
-      description: Roll i yrkandet
+      description: Yrkat resultat kopplat till ett yrkande
       properties:
         id:
           type: string
           format: uuid
-          description: Id för rollen
+          description: Yrkat resultatets unika ID
         version:
-          type: string
-          description: Version av rollen
-        namn:
-          type: string
-          description: Bas-roller är SOKANDE, AVSER, OMBUD, STALLFORETRADARE men ej begränsat till dessa värden.
-      example:
-        id: "58435904-c2b6-4b1f-a0ab-62f1839d8ff2"
-        version: "1.0"
-        namn: "SOKANDE"
-
-    Ersattning:
-      type: object
-      description: Ersättning kopplad till ett yrkande
-      properties:
-        id:
-          type: string
-          description: Ersättningens unika ID
-          format: uuid
-        belopp:
           type: integer
-          description: Ersättningsbelopp
-        berakningsgrund:
-          $ref: '#/components/schemas/Berakningsgrund'
-        beloppstyp:
-          $ref: '#/components/schemas/Beloppstyp'
-        ersattningstyp:
-          $ref: '#/components/schemas/Ersattningstyp'
-        periodisering:
-          $ref: '#/components/schemas/Periodisering'
-        omfattning:
-          type: integer
-          description: Omfattning för ersättningen (i procent, 50 = 50%)
-        beslutsutfall:
-          $ref: '#/components/schemas/Beslutsutfall'
-        avslagsanledning:
-          type: string
-          nullable: true
-          description: Anledning till avslag
-        produceratResultat:
-          $ref: '#/components/schemas/ProduceratResultat'
-
-    Berakningsgrund:
-      type: string
-      description: Grunden för beräkning
-      enum:
-        - LON
-        - FASTBELOPP
-
-    Beloppstyp:
-      type: string
-      description: Typ av belopp
-      enum:
-        - INKOMSTBASERAD
-        - GRUNDBELOPP
-
-    Ersattningstyp:
-      type: object
-      description: Ersättningstyp enligt lagrum
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: Id för ersättningstyp
-        namn:
-          type: string
-          description: Namn på ersättningstyp
-      example: 
-        id: "314454e9-ca6d-4fa9-9ec5-e724fc58112f"
-        description: "Hundbidrag"
-
-    Periodisering:
-      type: string
-      description: Periodisering av ersättning
-      enum:
-        - MANAD
-        - VECKA
-        - DAG
-        - ENGANGS
-
-    ProduceratResultat:
-      type: object
-      description: Producerat resultat kopplat till en ersättning
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: Producerat resultatets unika ID
-        version:
-          type: string
-          description: Version av producerat resultat
+          description: Version av yrkat resultat
         from:
           type: string
           format: date-time
@@ -316,67 +290,335 @@ components:
           type: string
           format: date-time
           description: Slutdatum/tid då resultatet gäller till, enligt ISO 8601
-        status:
-          $ref: '#/components/schemas/Ersattningsstatus'
+        typ:
+          type: string
+          description: Specificerar vilket typ av resultat objekt
+        data:
+          type: string
+          description: Json data av den typ som har angetts
+      required:
+        - id
+        - version
+        - from
+        - tom
+        - typ
+        - data
 
-    Ersattningsstatus:
+    Handlaggning:
+      type: object
+      description: Handläggning, ärendeinstans
+      properties:
+        id:
+          type: string
+          description: Handläggningens unika ID
+          format: uuid
+        version:
+          type: string
+          description: Handläggningens version
+        yrkandeId:
+          type: string
+          description: Yrkandets unika ID
+          format: uuid
+        processinstansId:
+          type: string
+          description: BPMN processinstansens unika ID
+          format: uuid
+        skapadTS:
+          type: string
+          description: DateTime när handläggning skapades, enligt ISO 8601
+          format: date-time
+        avslutadTS:
+          type: string
+          description: DateTime när handläggning avslutades, enligt ISO 8601
+          format: date-time
+        handlaggningspecifikationId:
+          type: string
+          format: uuid
+        resultat:
+          type: array
+          description: Ett eller flera resultat av handläggningen
+          items:
+            $ref: '#/components/schemas/Resultat'
+
+      required:
+        - id
+        - version
+        - yrkandeId
+        - processinstansId
+        - skapadTS
+        - handlaggningspecifikation
+        - resultat
+
+    HandlaggningUpdate:
+      type: object
+      description: Handläggning, ärendeinstans
+      properties:
+        id:
+          type: string
+          description: Handläggningens unika ID
+          format: uuid
+        version:
+          type: string
+          description: Handläggningens version
+        yrkandeId:
+          type: string
+          description: Yrkandets unika ID
+          format: uuid
+        processinstansId:
+          type: string
+          description: BPMN processinstansens unika ID
+          format: uuid
+        skapadTS:
+          type: string
+          description: DateTime när handläggning skapades, enligt ISO 8601
+          format: date-time
+        avslutadTS:
+          type: string
+          description: DateTime när handläggning avslutades, enligt ISO 8601
+          format: date-time
+        handlaggningspecifikationId:
+          type: string
+          format: uuid
+        underlag:
+          type: array
+          description: Ett eller flera underlag som handläggningen använder sig av
+          items:
+            $ref: '#/components/schemas/Underlag'
+        resultat:
+          type: array
+          description: Ett eller flera resultat av handläggningen
+          items:
+            $ref: '#/components/schemas/Resultat'
+        uppgift:
+          $ref: '#/components/schemas/UppgiftUpdate'
+      required:
+        - id
+        - version
+        - yrkandeId
+        - processinstansId
+        - skapadTS
+        - handlaggningspecifikation
+        - underlag
+        - resultat
+
+    UppgiftStatus:
       type: string
-      description: Ersättningsstatus
+      description: Uppgiftens status
       enum:
-        - PLANERAT
-        - YRKAT
-        - UNDER_UTREDNING
-        - FASTSTALLT_UNDER_UTREDNING
-        - FASTSTALLT
+        - PLANERAD
+        - TILLDELAD
+        - AVSLUTAD
+
+    Uppgift:
+      type: object
+      description: Uppgift
+      properties:
+        id:
+          type: string
+          description: Uppgiftens ID
+          format: uuid
+        version:
+          type: string
+          description: Uppgiftens version
+        skapadTs:
+          type: string
+          format: date-time
+          description: Tidpunkt då uppgiften skapades, enligt ISO 8601
+        utfordTs:
+          type: string
+          format: date-time
+          description: Tidpunkt då uppgiften utfördes, enligt ISO 8601
+          nullable: true
+        planeradTs:
+          type: string
+          format: date-time
+          description: Tidpunkt då uppgiften är planerad att utföras, enligt ISO 8601
+          nullable: true
+        utforarId:
+          type: string
+          description: Utförarens ID
+          format: uuid
+          nullable: true
+        aktivitetId:
+          type: string
+          description: Aktivitetens Id
+          format: uuid
+        uppgiftspecifikation:
+          $ref: '#/components/schemas/UppgiftSpecifikation'
+        uppgiftStatus:
+          $ref: '#/components/schemas/UppgiftStatus'
+        FSSAinformation:
+          $ref: '#/components/schemas/FSSAinformation'
+        modifieradeResultat:
+          type: array
+          description: Resultat modifierade av uppgiften
+          $ref: '#/components/schemas/ModifieratResultat'
+      required:
+        - id
+        - version
+        - handlaggningId
+        - uppgiftStatus
+
+    UppgiftSpecifikation:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        version:
+          type: int
+
+    ModifieratResultat:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        version:
+          type: int
+
+    UppgiftUpdate:
+      type: object
+      description: Uppgift
+      properties:
+        id:
+          type: string
+          description: Uppgiftens ID
+          format: uuid
+        version:
+          type: string
+          description: Uppgiftens version
+        skapadTs:
+          type: string
+          format: date-time
+          description: Tidpunkt då uppgiften skapades, enligt ISO 8601
+        utfordTs:
+          type: string
+          format: date-time
+          description: Tidpunkt då uppgiften utfördes, enligt ISO 8601
+          nullable: true
+        planeradTs:
+          type: string
+          format: date-time
+          description: Tidpunkt då uppgiften är planerad att utföras, enligt ISO 8601
+          nullable: true
+        utforarId:
+          type: string
+          description: Utförarens ID
+          format: uuid
+          nullable: true
+        aktivitetId:
+          type: string
+          description: Aktivitetens Id
+          format: uuid
+        uppgiftspecifikation:
+          $ref: '#/components/schemas/UppgiftSpecifikation'
+        uppgiftStatus:
+          $ref: '#/components/schemas/UppgiftStatus'
+        FSSAinformation:
+          $ref: '#/components/schemas/FSSAinformation'
+
+      required:
+        - id
+        - version
+        - handlaggningId
+        - uppgiftStatus
+
+    Underlag:
+      type: object
+      properties:
+        typ:
+          type: string
+          description: Specificerar vilken typ av underlag det är
+        version:
+          type: string
+          description: Specificerar vilken version av underlags typ det är
+        data:
+          type: string
+          description: All data i underlaget i formatet JSON
+      required:
+        - typ
+        - version
+        - data
+
+    Resultat:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Resultatets unika id
+          format: uuid
+        version:
+          type: string
+          description: Specificerar vilken version av resultatet det är
+        from:
+          type: string
+          format: date-time
+          description: Resultat från och med datum
+        tom:
+          type: string
+          format: date-time
+          description: Resultat till och med datum
+        yrkandestatus:
+          $ref: '#/components/schemas/Yrkandestatus'
+        avslagsanledning:
+          type: string
+          description: Orsak till avslag
+        typ:
+          type: string
+          description: Specificerar vilken typ av resultat det är
+        data:
+          type: string
+          description: All data i resultatet i formatet JSON
+      required:
+        - id
+        - version
+        - from
+        - tom
+        - yrkandestatus
+        - typ
+        - data
+
+    FSSAinformation:
+      type: string
+      enum:
+        - HANDLAGGNING_PAGAR
+        - VANTAR_PA_INFO_FRAN_ANNAN_PART
+        - VANTAR_PA_INFO_FRAN_KUND
 
     PostYrkandeRequest:
       type: object
       description: Data som krävs för att skapa ett nytt yrkande
       properties:
-        person:
-          type: array
-          description: Personer involverade i yrkandet
-          items:
-            type: object
-            properties:
-              persnr:
-                type: string
-                description: Svenskt personnummer, 12 siffror med bindestreck (YYYYMMDD-XXXX)
-              yrkanderollId:
-                type: string
-                format: uuid
-                description: Id för roll i yrkandet
-              yrkande:
-                type: boolean
-                description: Anger om personen är den som utför själva yrkandet
-        formanstyp:
+        erbjudandeId:
           type: string
           format: uuid
-          description: Id för typ av förmån
-        period:
-          $ref: '#/components/schemas/Period'
-        ersattning:
+          description: Vilket erbjudande yrkandet avser
+        yrkandeFrom:
+          type: string
+          format: date-time
+          description: Yrkande från och med datum
+        yrkandeTom:
+          type: string
+          format: date-time
+          description: Yrkande till och med datum
+        individYrkandeRoller:
           type: array
-          description: Begärda ersättningar
+          description: Lista av personer involverade i yrkandet samt deras roll
           items:
-            type: object
-            description: Begärd ersättning
-            properties:
-              ersattningstyp:
-                $ref: '#/components/schemas/Ersattningstyp'
-              omfattning:
-                type: integer
-                description: Omfattning för ersättningen (i procent, 50 = 50%)
-              period:
-                $ref: '#/components/schemas/Period'
-              periodisering:
-                $ref: '#/components/schemas/Periodisering'
+            $ref: '#/components/schemas/IndividYrkandeRoll'
+        yrkatResultat:
+          type: array
+          description: Lista av yrkat resultat
+          items:
+            $ref: '#/components/schemas/YrkatResultatCreate'
       required:
-        - person
-        - formanstyp
-        - period
-        - ersattning
-
+        - erbjudandeId
+        - yrkandeFrom
+        - yrkandeTom
+        - individYrkandeRoller
+        - yrkatResultat
+       
     PostYrkandeResponse:
       type: object
       description: Svar vid skapande av ett nytt yrkande
@@ -386,6 +628,95 @@ components:
       required:
         - yrkande
 
+    PutYrkandeRequest:
+      type: object
+      description: Object för att uppdatera ett yrkande
+      properties:
+        version:
+          type: integer
+          description: Yrkandets version
+        yrkandeFrom:
+          type: string
+          format: date-time
+          description: Yrkande från och med datum
+        yrkandeTom:
+          type: string
+          format: date-time
+          description: Yrkande till och med datum
+        yrkandestatus:
+          $ref: '#/components/schemas/Yrkandestatus'
+        avsikt:
+          $ref: '#/components/schemas/Avsiktstyp'
+        individYrkandeRoller:
+          type: array
+          description: Lista av personer involverade i yrkandet samt deras roll
+          items:
+            $ref: '#/components/schemas/IndividYrkandeRoll'
+        yrkatResultat:
+          type: array
+          description: Lista av yrkat resultat
+          items:
+            $ref: '#/components/schemas/YrkatResultatCreate'
+        handlaggning:
+          $ref: '#/components/schemas/HandlaggningUpdate'
+      required:
+        - version
+        - yrkandeFrom
+        - yrkandeTom
+        - yrkandestatus
+        - avsikt
+        - individYrkandeRoller
+        - yrkatResultat
+
+    PutYrkandeResponse:
+      type: object
+      description: Svar efter att ett yrkande uppdaterats
+      properties:
+        yrkande:
+          $ref: '#/components/schemas/Yrkande'
+      required:
+        - yrkande
+
+    IndividYrkandeRoll:
+      type: object
+      description: Representerar en individ tillsammans med dess roll
+      properties:
+        individId:
+          type: string
+          format: uuid
+          description: Id till en individ
+        yrkandeRollId:
+          type: string
+          format: uuid
+          description: Id till en yrkande roll
+      required:
+        - individId
+        - yrkandeRollId
+
+    YrkatResultatCreate:
+      type: object
+      description: Data som behövs för att skapa ett yrkat resultat
+      properties:
+        from:
+          type: string
+          format: date-time
+          description: Yrkat från och med datum
+        tom:
+          type: string
+          format: date-time
+          description: Yrkat till och med datum
+        typ:
+          type: string
+          description: Specificerar vilket typ av resultat objekt
+        data:
+          type: string
+          description: Json data av den typ som har angetts
+      required:
+        - from
+        - tom
+        - typ
+        - data
+
     Beslutsutfall:
       type: string
       description: Beslutsutfall för ersättning
@@ -394,38 +725,27 @@ components:
         - NEJ
         - FU
 
-    UpdateErsattning:
+    HandlaggningResponse:
       type: object
-      description: Uppdatering av beslutsutfall för en ersättning
+      description: Svar vid skapande/hämtning av handläggning
       properties:
-        ersattningId:
-          type: string
-          format: uuid
-          description: Ersättningens unika ID
-        beslutsutfall:
-          $ref: '#/components/schemas/Beslutsutfall'
-          nullable: true
-        avslagsanledning:
-          type: string
-          nullable: true
-          description: Anledning till avslag
-        ErsattningsStatus:
-          $ref: '#/components/schemas/Ersattningsstatus'
-          nullable: true
+        handlaggning:
+          $ref: '#/components/schemas/Handlaggning'
       required:
-        - ersattningId
+        - handlaggning
 
-    PatchErsattningarRequest:
-      type: array
-      description: Lista med ersättningar att uppdatera beslutsutfall för
-      items:
-        $ref: '#/components/schemas/UpdateErsattning'
-
-    PatchErsattningarResponse:
+    PutHandlaggningRequest:
       type: object
-      description: Returneras nya yrkandet efter uppdatering av beslutsutfall i ersättningar
+      description: Uppdatera handläggning
       properties:
-        yrkande:
-          $ref: '#/components/schemas/Yrkande'
+        handlaggning:
+          $ref: '#/components/schemas/HandlaggningUpdate'
+
+    PutHandlaggningResponse:
+      type: object
+      description: Svar vid uppdatering av handläggning
+      properties:
+        handlaggning:
+          $ref: '#/components/schemas/HandlaggningUpdate'
       required:
-        - yrkande
+        - handlaggning
