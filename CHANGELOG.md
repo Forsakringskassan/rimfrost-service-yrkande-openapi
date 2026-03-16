@@ -1,3 +1,16 @@
+## 0.1.0 (2026-03-16)
+
+### Features
+
+-  rework yrkande openapi ([27721](https://github.com/Forsakringskassan/rimfrost-service-yrkande-openapi/commit/2772162bb703572) Nils Elveros)  
+
+### Bug Fixes
+
+-  initiala resultat i POST handlaggning ([49950](https://github.com/Forsakringskassan/rimfrost-service-yrkande-openapi/commit/499501985f895d0) Ulf Slunga)  
+-  initiala resultat i POST handlaggning ([8b94c](https://github.com/Forsakringskassan/rimfrost-service-yrkande-openapi/commit/8b94cba7f6305e3) Ulf Slunga)  
+-  yrkandeId i path ([ee8e6](https://github.com/Forsakringskassan/rimfrost-service-yrkande-openapi/commit/ee8e68706e10d96) Ulf Slunga)  
+-  lägger till handläggning ([46898](https://github.com/Forsakringskassan/rimfrost-service-yrkande-openapi/commit/46898b88e112900) Ulf Slunga)  
+
 # rimfrost-service-yrkande-openapi changelog
 
 Changelog of rimfrost-service-yrkande-openapi.
