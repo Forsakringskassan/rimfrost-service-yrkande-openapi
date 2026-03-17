@@ -1,3 +1,28 @@
+## 0.1.1 (2026-03-17)
+
+### Other changes
+
+**Create gradle-release.yaml**
+
+
+[27786](https://github.com/Forsakringskassan/rimfrost-service-yrkande-openapi/commit/27786e4e06f788b) Ulf Slunga *2026-03-17 07:07:29*
+
+**Create gradle-ci.yaml**
+
+
+[67ff6](https://github.com/Forsakringskassan/rimfrost-service-yrkande-openapi/commit/67ff63c44b44c6e) Ulf Slunga *2026-03-17 07:06:57*
+
+**Delete .github/workflows/api-npm-release.yaml**
+
+
+[71c21](https://github.com/Forsakringskassan/rimfrost-service-yrkande-openapi/commit/71c212daa0e88de) Ulf Slunga *2026-03-17 07:05:54*
+
+**Delete .github/workflows/api-npm-ci.yaml**
+
+
+[6f05a](https://github.com/Forsakringskassan/rimfrost-service-yrkande-openapi/commit/6f05a8bd20676b9) Ulf Slunga *2026-03-17 07:05:41*
+
+
 ## 0.1.0 (2026-03-16)
 
 ### Features
