@@ -57,7 +57,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Yrkande'
+                $ref: '#/components/schemas/GetYrkandeResponse'
         '404':
           description: Yrkande hittades inte
     put: 
@@ -233,7 +233,7 @@ components:
           description: Lista av personer involverade i yrkandet samt deras roll
           items:
             $ref: '#/components/schemas/IndividYrkandeRoll'
-        yrkatResultat:
+        yrkadeResultat:
           type: array
           description: Lista av yrkade resultat
           items:
@@ -250,7 +250,7 @@ components:
         - yrkandeTom
         - avsikt
         - individYrkandeRoller
-        - yrkatResultat
+        - yrkadeResultat
 
     Yrkandestatus:
       type: string
@@ -607,9 +607,9 @@ components:
           description: Lista av personer involverade i yrkandet samt deras roll
           items:
             $ref: '#/components/schemas/IndividYrkandeRoll'
-        yrkatResultat:
+        yrkadeResultat:
           type: array
-          description: Lista av yrkat resultat
+          description: Lista av yrkade resultat
           items:
             $ref: '#/components/schemas/YrkatResultatCreate'
       required:
@@ -617,8 +617,17 @@ components:
         - yrkandeFrom
         - yrkandeTom
         - individYrkandeRoller
-        - yrkatResultat
-       
+        - yrkadeResultat
+
+    GetYrkandeResponse:
+      type: object
+      description: Svar vid hämtande av yrkande
+      properties:
+        yrkande:
+          $ref: '#/components/schemas/Yrkande'
+      required:
+        - yrkande
+
     PostYrkandeResponse:
       type: object
       description: Svar vid skapande av ett nytt yrkande
@@ -652,9 +661,9 @@ components:
           description: Lista av personer involverade i yrkandet samt deras roll
           items:
             $ref: '#/components/schemas/IndividYrkandeRoll'
-        yrkatResultat:
+        yrkadeResultat:
           type: array
-          description: Lista av yrkat resultat
+          description: Lista av yrkade resultat
           items:
             $ref: '#/components/schemas/YrkatResultatCreate'
         handlaggning:
@@ -666,7 +675,7 @@ components:
         - yrkandestatus
         - avsikt
         - individYrkandeRoller
-        - yrkatResultat
+        - yrkadeResultat
 
     PutYrkandeResponse:
       type: object
