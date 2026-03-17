@@ -1,3 +1,9 @@
+## 0.1.3 (2026-03-17)
+
+### Bug Fixes
+
+-  skapar GetYrkandeResponse-struktur samt renaming yrkatResultat -> yrkadeResultat ([f9555](https://github.com/Forsakringskassan/rimfrost-service-yrkande-openapi/commit/f95558972fdb93b) Ulf Slunga)  
+
 ## 0.1.2 (2026-03-17)
 
 ### Other changes
