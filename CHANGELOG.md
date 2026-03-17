@@ -1,3 +1,13 @@
+## 0.1.2 (2026-03-17)
+
+### Other changes
+
+**Update gradle.properties**
+
+
+[481be](https://github.com/Forsakringskassan/rimfrost-service-yrkande-openapi/commit/481be1161c23216) Ulf Slunga *2026-03-17 07:18:25*
+
+
 ## 0.1.1 (2026-03-17)
 
 ### Other changes
